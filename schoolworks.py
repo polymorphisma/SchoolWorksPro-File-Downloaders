@@ -7,10 +7,10 @@ import os
 import random
 import string
 
-USER_NAME = '' # -> schoolworkspro username
-PASSWORD = '' # -> schoolworkspro password
+USER_NAME = "" # -> schoolworkspro username
+PASSWORD = "" # -> schoolworkspro password
 module_url = "" # -> module url
-directory_path = '' #  -> where to save files
+directory_path = "" #  -> where to save files
 
 
 def return_access_token(USER_NAME, PASSWORD):
