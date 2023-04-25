@@ -9,7 +9,7 @@ pip install -r requirements.txt
 After installing the required modules, you can use this project by running the following steps:
 
 changes values in:
-USER_NAME = '' # -> schoolworkspro username
+USER_NAME = '' # -> schoolworkspro username \n
 PASSWORD = '' # -> schoolworkspro password
 module_url = "" # -> module url
 directory_path = '' #  -> where to save files(Optional)
