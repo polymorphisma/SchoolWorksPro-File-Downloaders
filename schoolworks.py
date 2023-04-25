@@ -7,9 +7,9 @@ import os
 import random
 import string
 
-USER_NAME = 'Shrawan' # -> schoolworkspro username
-PASSWORD = 'newPasswordBih' # -> schoolworkspro password
-module_url = "https://schoolworkspro.com/modules/csc-1020-introduction-to-e-commerce-sunway" # -> module url
+USER_NAME = '' # -> schoolworkspro username
+PASSWORD = '' # -> schoolworkspro password
+module_url = "" # -> module url
 directory_path = '' #  -> where to save files
 
 
