@@ -1,4 +1,3 @@
- 
 import requests
 import schoolworks_apis
 import re
@@ -111,7 +110,9 @@ def main(USER_NAME, PASSWORD, module_url, directory_path=""):
 
             save_path = os.path.join(directory_path, content['lessonTitle'].strip())
 
-            os.mkdir(generate_path(directory_path))
+            os.mkdir(generate_path(save_path))
+
+
 
             for link in tqdm(links):
                 file_name = link.split('/')[-1]
