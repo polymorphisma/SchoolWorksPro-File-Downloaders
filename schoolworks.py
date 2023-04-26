@@ -6,7 +6,6 @@ import random
 import string
 from tqdm import tqdm
 
-
 def return_access_token(USER_NAME, PASSWORD):
     """
         Sends a POST request to the SchoolWorks login API to obtain an access token for the given user credentials.
@@ -112,11 +111,11 @@ def main(USER_NAME, PASSWORD, module_url, directory_path=""):
 
             os.mkdir(generate_path(save_path))
 
-
-
             for link in tqdm(links):
+
                 file_name = link.split('/')[-1]
                 file_path = os.path.join(save_path, file_name)
+
                 response = requests.request('GET', link)
 
                 with open(file_path, "wb") as f:
@@ -124,7 +123,6 @@ def main(USER_NAME, PASSWORD, module_url, directory_path=""):
 
 
 if __name__ == '__main__':
-
     USER_NAME = "Shrawan" # -> schoolworkspro username
     PASSWORD = "newPasswordBih" # -> schoolworkspro password
     module_url = "https://schoolworkspro.com/modules/csc-1020-introduction-to-e-commerce-sunway" # -> module url
