@@ -1,6 +1,6 @@
-pandas
 requests
 re
 os
 random
 string
+tdqm

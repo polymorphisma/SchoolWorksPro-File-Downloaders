@@ -1,16 +1,11 @@
  
 import requests
-import pandas as pd
 import schoolworks_apis
 import re
 import os
 import random
 import string
-
-USER_NAME = "" # -> schoolworkspro username
-PASSWORD = "" # -> schoolworkspro password
-module_url = "" # -> module url
-directory_path = "" #  -> where to save files
+from tqdm import tqdm
 
 
 def return_access_token(USER_NAME, PASSWORD):
@@ -52,19 +47,6 @@ def return_access_token(USER_NAME, PASSWORD):
     
     return 'not valid'
 
-def return_api_url(url):
-    """
-    Takes a SchoolWorks module URL and returns the corresponding API URL for making a lessons request.
-
-    Parameters:
-    url (str): The URL of the SchoolWorks module.
-
-    Returns:
-    str: The API URL for making a lessons request for the specified module.
-    """
-    module_slang = url.split('/')[-1]
-    return schoolworks_apis.lessons_request_api.format(module_slang)
-
 def schoolworkspro_request(api_url, access_token):
     """
     Sends a GET request to the SchoolWorks API with the provided access token and returns the response as JSON.
@@ -82,39 +64,6 @@ def schoolworkspro_request(api_url, access_token):
     response = requests.request("GET", api_url, data=payload, headers=headers)
     return response.json()
 
-def parse_lesson_response(response):
-    """
-    Takes a JSON response from the SchoolWorks API and extracts the 'lessons' field. 
-    Then converts the data into a Pandas DataFrame.
-
-    Parameters:
-    response (dict): The JSON response from the SchoolWorks API.
-
-    Returns:
-    pandas.DataFrame: A DataFrame containing the lesson data extracted from the JSON response.
-    """
-    response = response['lessons']
-
-    df = pd.DataFrame({})
-
-    for res in response:
-        df = pd.concat([df, pd.DataFrame(res['lessons'])])
-
-    return df
-
-def parse_raw_link(string):
-    """
-    Parses a string for all href links and returns them as a list.
-
-    Parameters:
-    string (str): The string to parse for href links.
-
-    Returns:
-    list: A list of href links extracted from the provided string.
-    """
-    hrefs = re.findall(r'href="(.*?)"', string)
-    return hrefs
-
 def generate_random_string(n):
     """
     Generates a random string of length n using uppercase and lowercase letters and digits.
@@ -131,36 +80,53 @@ def generate_random_string(n):
     # Generate a random string of length n
     return ''.join(random.choices(chars, k=n))
 
+def generate_path(path):
+    if os.path.exists(path):
+        path += generate_random_string(10)
+    return path
 
-if directory_path == '':
-    dir = os.path.dirname(os.path.abspath(__file__))
-    directory_path = os.path.join(dir, module_url.split('/')[-1])
-    try:
-        os.mkdir(directory_path)
-    except FileExistsError:
-        os.mkdir(directory_path+generate_random_string(10))
+def main(USER_NAME, PASSWORD, module_url, directory_path=""):
+    module_slang = module_url.split('/')[-1]
 
-lesson_url = return_api_url(module_url)
-access_token = return_access_token(USER_NAME=USER_NAME, PASSWORD=PASSWORD)
-lesson_response = schoolworkspro_request(lesson_url, access_token)
-module_df = parse_lesson_response(lesson_response)
+    if directory_path == '':
+        dir = os.path.dirname(os.path.abspath(__file__))
 
-for ind, row in module_df.iterrows():
-    lesson_ = schoolworks_apis.lessons_link_api.format(row['lessonSlug'])
-    link_response = schoolworkspro_request(lesson_, access_token)
-    raw_links = link_response['lesson']['lessonContents']
-    links = parse_raw_link(raw_links)
+        directory_path = os.path.join(dir, module_slang)
 
-    save_path = os.path.join(directory_path, row['lessonTitle'].strip())
+        os.mkdir(generate_path(directory_path))
 
-    try:
-        os.mkdir(save_path)
-    except FileExistsError:
-        os.mkdir(save_path+generate_random_string(10))
+    lesson_url = schoolworks_apis.lessons_request_api.format(module_slang)
+    access_token = return_access_token(USER_NAME=USER_NAME, PASSWORD=PASSWORD)
+    lesson_response = schoolworkspro_request(lesson_url, access_token)
 
-    for link in links:
-        file_name = link.split('/')[-1]
-        file_path = os.path.join(save_path, file_name)
-        response = requests.request('GET', link)
-        with open(file_path, "wb") as f:
-            f.write(response.content)
+    for lessons in tqdm(lesson_response['lessons']):
+        for content in tqdm(lessons['lessons']):
+
+            lesson_ = schoolworks_apis.lessons_link_api.format(content['lessonSlug'])
+
+            link_response = schoolworkspro_request(lesson_, access_token)
+            raw_links = link_response['lesson']['lessonContents']
+
+            links = re.findall(r'href="(.*?)"', raw_links)
+
+            save_path = os.path.join(directory_path, content['lessonTitle'].strip())
+
+            os.mkdir(generate_path(directory_path))
+
+            for link in tqdm(links):
+                file_name = link.split('/')[-1]
+                file_path = os.path.join(save_path, file_name)
+                response = requests.request('GET', link)
+
+                with open(file_path, "wb") as f:
+                    f.write(response.content)
+
+
+if __name__ == '__main__':
+
+    USER_NAME = "Shrawan" # -> schoolworkspro username
+    PASSWORD = "newPasswordBih" # -> schoolworkspro password
+    module_url = "https://schoolworkspro.com/modules/csc-1020-introduction-to-e-commerce-sunway" # -> module url
+    directory_path = "" #  -> where to save files
+
+    main(USER_NAME, PASSWORD, module_url, directory_path)
