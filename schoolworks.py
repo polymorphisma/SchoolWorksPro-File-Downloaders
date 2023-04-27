@@ -86,16 +86,21 @@ def generate_path(path):
 def main(USER_NAME, PASSWORD, module_url, directory_path=""):
     module_slang = module_url.split('/')[-1]
 
-    if directory_path == '':
-        dir = os.path.dirname(os.path.abspath(__file__))
+    if directory_path == "":
+        current_dir = os.path.dirname(os.path.abspath(__file__))
 
-        directory_path = os.path.join(dir, module_slang)
+        directory_path = os.path.join(current_dir, module_slang)
 
         os.mkdir(generate_path(directory_path))
 
-    lesson_url = schoolworks_apis.lessons_request_api.format(module_slang)
+    else:
+        directory_path = os.path.join(directory_path, module_slang)
+        os.mkdir(generate_path(directory_path))
+        
+
+    lesson_api_url = schoolworks_apis.lessons_request_api.format(module_slang)
     access_token = return_access_token(USER_NAME=USER_NAME, PASSWORD=PASSWORD)
-    lesson_response = schoolworkspro_request(lesson_url, access_token)
+    lesson_response = schoolworkspro_request(lesson_api_url, access_token)
 
     for lessons in tqdm(lesson_response['lessons']):
         for content in tqdm(lessons['lessons']):
@@ -123,9 +128,10 @@ def main(USER_NAME, PASSWORD, module_url, directory_path=""):
 
 
 if __name__ == '__main__':
-    USER_NAME = "Shrawan" # -> schoolworkspro username
-    PASSWORD = "newPasswordBih" # -> schoolworkspro password
-    module_url = "https://schoolworkspro.com/modules/csc-1020-introduction-to-e-commerce-sunway" # -> module url
-    directory_path = "" #  -> where to save files
+    USER_NAME = "" # -> schoolworkspro username
+    PASSWORD = "" # -> schoolworkspro password
+    module_url = "" # -> module url
+    directory_path = r"" #  -> where to save files
 
     main(USER_NAME, PASSWORD, module_url, directory_path)
+ 
